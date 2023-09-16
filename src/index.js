@@ -1,4 +1,13 @@
-let asd = document.createElement("div");
-asd.textContent = 'TEST'
+// CSS
+import './reset.css';
+import './style.css';
 
-document.body.appendChild(asd);
+import { loadSection } from './modules/dom/dom';
+import { createFooter } from './modules/footer/footer';
+import { createMain } from './modules/main/main';
+import { createHeader } from './modules/header/header';
+
+const body = document.querySelector('body');
+loadSection(createHeader(), body);
+loadSection(createMain(), body);
+loadSection(createFooter(), body);

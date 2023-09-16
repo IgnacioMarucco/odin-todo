@@ -1,0 +1,43 @@
+/* Global variables */
+
+:root {
+  --light-color: #d5d6db;
+  --dark-color: #1a1b26;
+
+  --main-color: #33635c;
+  --secondary-color: #24283b;
+  --optional-color: #f5a272;
+
+  --default-font: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --main-font: 'Roboto';
+}
+
+h1 {
+	font-size: 3rem;
+}
+h2 {
+	font-size: 2rem;
+}
+h3 {
+	font-size: 1.5rem;
+}
+p {
+	font-size: 1rem;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+#content {
+	flex: 1;
+	background-color: var(--dark-color);
+	
+	/* display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center; */
+}
