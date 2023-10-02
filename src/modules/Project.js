@@ -25,6 +25,14 @@ class Project {
   addTask (newTask) {
     this.tasks.push(newTask);
   }
+
+  getTaskIndex(task) {
+    return this.tasks.indexOf(task)
+  }
+
+  removeTask (task) {
+    return this.tasks.splice(this.getTaskIndex(task), 1);
+  }
 }
 
 export { Project };

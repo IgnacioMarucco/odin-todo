@@ -19,3 +19,23 @@ main {
   background-color: var(--main-color);
 }
 
+.low-priority {
+  border-bottom: solid 1px green;
+}
+
+.medium-priority {
+  border-bottom: solid 1px yellow;
+}
+
+.high-priority {
+  border-bottom: solid 1px red;
+}
+
+.task-description {
+  /* background-color: aqua; */
+  /* display: none; */
+}
+
+.task {
+  /* background-color: red; */
+}
