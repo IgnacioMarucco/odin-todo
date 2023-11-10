@@ -12,6 +12,18 @@ const ScreenController = (() => {
   const sidePanel = new DOMElement('nav').annexAttributes({id: 'side-panel'}).build();
   const currentView = new DOMElement('div').annexAttributes({id: 'current-view'}).build();
 
+  function renderBody() {
+    document.body.appendChild(header);
+    document.body.appendChild(main);
+    document.body.appendChild(footer);
+
+    main.appendChild(sidePanel);
+    main.appendChild(currentView);
+
+    renderSidePanel();
+    renderAllProjects();
+  }
+
   function renderSidePanel() {
     sidePanel.innerHTML = '';
     const projectsListArray = AppController.getProjectsList();
@@ -24,6 +36,7 @@ const ScreenController = (() => {
             .annexTextContent(`${project.title}`)
             .annexEventListener('click', () => {
               AppController.changeCurrentProject(project);
+              renderProject(project)
               }
             )
           )
@@ -32,6 +45,8 @@ const ScreenController = (() => {
 
     // Home Project Button
     const homeProjectBtn = new DOMElement('button').annexTextContent('Home').annexEventListener('click', () => {
+      // FIX
+      AppController.changeCurrentProject(null);
       renderAllProjects();
     });
 
@@ -43,25 +58,6 @@ const ScreenController = (() => {
     sidePanel.appendChild(homeProjectBtn.build());
     sidePanel.appendChild(projectsListElement.build());
     sidePanel.appendChild(newProjectBtn.build());
-  }
-
-  function renderForm(formType, projectToModify, taskToModify) {
-    currentView.innerHTML = '';
-
-    switch (formType) {
-      case 'newProject':
-        currentView.appendChild(newProjectForm().build());
-        break;
-      case 'newTask':
-        currentView.appendChild(newTaskForm().build());
-        break;
-      case 'editProject':
-        currentView.appendChild(editProjectForm(projectToModify).build());
-        break;
-      case 'editTask':
-        currentView.appendChild(editTaskForm(projectToModify, taskToModify).build());
-        break;
-    }
   }
 
   function renderAllProjects() {
@@ -94,39 +90,11 @@ const ScreenController = (() => {
       .annexTextContent('Delete Project')
       .annexAttributes({["data-projectIndex"]: `${currentProjectIndex}`})
       .annexEventListener('click', (e) => deleteProject(e));
-    projectTasksArray.forEach(task => console.log(task))
-    projectTasksArray.forEach(task =>
-      projectTasksElement
-        .annexChild(new DOMElement('li')
-          .annexAttributes({class: `task ${task.priority}`, ["data-projectIndex"]: `${currentProjectIndex}`, ["data-taskIndex"]: `${currentProject.getTaskIndex(task)}`})
-          .annexChild(new DOMElement('h5')
-            .annexTextContent(`${task.title}`)
-          )
-          .annexChild(new DOMElement('input')
-            .annexAttributes({type: 'checkbox',["data-projectIndex"]: `${currentProjectIndex}`, ["data-taskIndex"]: `${currentProject.getTaskIndex(task)}`, checked: task.done === true ? "checked" : null,})
-            .annexEventListener('change', (e) => toggleDone(e))
-          )
-          .annexChild(new DOMElement('p')
-            .annexAttributes({class: 'task-description', style: 'display: none'})
-            .annexTextContent(`${task.description}`)
-          )
-          .annexChild(new DOMElement('button')
-            .annexTextContent('Description')
-            .annexAttributes({["data-projectIndex"]: `${currentProjectIndex}`, ["data-taskIndex"]: `${currentProject.getTaskIndex(task)}`})
-            .annexEventListener('click', (e) => toggleDescription(e))
-          )
-          .annexChild(new DOMElement('button')
-            .annexTextContent('Edit Task')
-            .annexAttributes({["data-projectIndex"]: `${currentProjectIndex}`, ["data-taskIndex"]: `${currentProject.getTaskIndex(task)}`})
-            .annexEventListener('click', (e) => editTask(e))
-          )
-          .annexChild(new DOMElement('button')
-            .annexAttributes({["data-projectIndex"]: `${currentProjectIndex}`, ["data-taskIndex"]: `${currentProject.getTaskIndex(task)}`})
-            .annexTextContent('Delete Task')
-            .annexEventListener('click', (e) => deleteTask(e))
-          )
-        )
-    )
+
+    projectTasksArray.forEach(task => {
+      const taskElement = createTaskElement(currentProject, currentProjectIndex, task);
+      projectTasksElement.annexChild(taskElement)
+      })
 
     const projectNewTaskBtn = new DOMElement('button')
       .annexTextContent('New Task')
@@ -143,6 +111,37 @@ const ScreenController = (() => {
     currentView.appendChild(projectDetails.build());
   }
 
+  function createTaskElement(currentProject, currentProjectIndex, task) {
+    return new DOMElement('li')
+      .annexAttributes({class: `task ${task.priority}`, ["data-projectIndex"]: `${currentProjectIndex}`, ["data-taskIndex"]: `${currentProject.getTaskIndex(task)}`})
+      .annexChild(new DOMElement('h5')
+        .annexTextContent(`${task.title}`)
+      )
+      .annexChild(new DOMElement('input')
+        .annexAttributes({type: 'checkbox',["data-projectIndex"]: `${currentProjectIndex}`, ["data-taskIndex"]: `${currentProject.getTaskIndex(task)}`, checked: task.done === true ? "checked" : null,})
+        .annexEventListener('change', (e) => toggleDone(e))
+      )
+      .annexChild(new DOMElement('p')
+        .annexAttributes({class: 'task-description', style: 'display: none'})
+        .annexTextContent(`${task.description}`)
+      )
+      .annexChild(new DOMElement('button')
+        .annexTextContent('Description')
+        .annexAttributes({["data-projectIndex"]: `${currentProjectIndex}`, ["data-taskIndex"]: `${currentProject.getTaskIndex(task)}`})
+        .annexEventListener('click', (e) => toggleDescription(e))
+      )
+      .annexChild(new DOMElement('button')
+        .annexTextContent('Edit Task')
+        .annexAttributes({["data-projectIndex"]: `${currentProjectIndex}`, ["data-taskIndex"]: `${currentProject.getTaskIndex(task)}`})
+        .annexEventListener('click', (e) => editTask(e))
+      )
+      .annexChild(new DOMElement('button')
+        .annexAttributes({["data-projectIndex"]: `${currentProjectIndex}`, ["data-taskIndex"]: `${currentProject.getTaskIndex(task)}`})
+        .annexTextContent('Delete Task')
+        .annexEventListener('click', (e) => deleteTask(e))
+      )
+  }
+
   function editProject(e) {
     const projectToModify = AppController.getProjectsList()[e.target.attributes["data-projectIndex"].value];
     renderForm('editProject', projectToModify)
@@ -157,27 +156,22 @@ const ScreenController = (() => {
 
   function editTask(e) {
     const projectToModify = AppController.getProjectsList()[e.target.attributes["data-projectIndex"].value];
-    const taskToModify = projectToModify.getTasks[e.target.attributes["data-taskIndex"].value];
+    const taskToModify = projectToModify.tasks[e.target.attributes["data-taskIndex"].value];
     renderForm('editTask', projectToModify, taskToModify);
   }
 
   function deleteTask(e) {
     const projectToModify = AppController.getProjectsList()[e.target.attributes["data-projectIndex"].value];
-    const taskToDelete = projectToModify.getTasks[e.target.attributes["data-taskIndex"].value];
+    const taskToDelete = projectToModify.tasks[e.target.attributes["data-taskIndex"].value];
 
     AppController.deleteTask(projectToModify, taskToDelete);
 
-    if (AppController.getCurrentProject()) {
-      renderProject(AppController.getCurrentProject());
-    } else {
-      renderAllProjects();
-    }
-    
+    renderChoice(AppController.getCurrentProject());
   }
 
   function toggleDone(e) {
     const projectToModify = AppController.getProjectsList()[e.target.attributes["data-projectIndex"].value];
-    const taskToModify = projectToModify.getTasks[e.target.attributes["data-taskIndex"].value];
+    const taskToModify = projectToModify.tasks[e.target.attributes["data-taskIndex"].value];
     AppController.toggleDone(projectToModify, taskToModify);
   }
 
@@ -191,6 +185,25 @@ const ScreenController = (() => {
     descriptionElement.style.display === "none" ? descriptionElement.style.display = "block" : descriptionElement.style.display = "none";
   }
 
+  function renderForm(formType, projectToModify, taskToModify) {
+    currentView.innerHTML = '';
+
+    switch (formType) {
+      case 'newProject':
+        currentView.appendChild(newProjectForm().build());
+        break;
+      case 'newTask':
+        currentView.appendChild(newTaskForm().build());
+        break;
+      case 'editProject':
+        currentView.appendChild(editProjectForm(projectToModify).build());
+        break;
+      case 'editTask':
+        currentView.appendChild(editTaskForm(projectToModify, taskToModify).build());
+        break;
+    }
+  }
+
   function newProjectForm() {
     return new DOMElement('form')
           .annexChild(new DOMElement('h2').annexTextContent('New Project'))
@@ -201,6 +214,7 @@ const ScreenController = (() => {
             const projectTitle = document.querySelector('#project_title').value
             AppController.createProject(projectTitle);
             renderSidePanel();
+            renderProject(AppController.getCurrentProject())
           }))
   }
 
@@ -283,25 +297,17 @@ const ScreenController = (() => {
 
 
             AppController.editTask(project, task, taskTitle, taskDescription, taskPriority);
-            // TODO add new function to no repeat this
-            if (AppController.getCurrentProject()) {
-              renderProject(AppController.getCurrentProject());
-            } else {
-              renderAllProjects();
-            }
+
+            renderChoice(AppController.getCurrentProject())
           }))
   }
 
-  function renderBody() {
-    document.body.appendChild(header);
-    document.body.appendChild(main);
-    document.body.appendChild(footer);
-
-    main.appendChild(sidePanel);
-    main.appendChild(currentView);
-
-    renderSidePanel();
-    renderAllProjects();
+  function renderChoice(currentProject) {
+    if (currentProject) {
+      renderProject(currentProject);
+    } else {
+      renderAllProjects();
+    }
   }
 
   return { renderBody , renderSidePanel, renderAllProjects, renderProject}

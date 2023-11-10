@@ -2,23 +2,23 @@ import { Project } from "./Project";
 
 class List {
   constructor() {
-    this.projects = [new Project('Study'), new Project('Work')];
+    this._projects = [new Project('Study'), new Project('Work')];
   }
 
-  get getProjects() {
-    return this.projects;
+  get projects() {
+    return [...this._projects];
   }
 
   addProject (newProject) {
-    this.projects.push(newProject);
+    this._projects.push(newProject);
   }
 
   getProjectIndex(project) {
-    return this.projects.indexOf(project)
+    return this._projects.indexOf(project)
   }
 
   removeProject (project) {
-    return this.projects.splice(this.getProjectIndex(project), 1);
+    this._projects.splice(this.getProjectIndex(project), 1);
   }
 
 }

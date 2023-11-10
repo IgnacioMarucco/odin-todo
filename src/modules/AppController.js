@@ -27,20 +27,16 @@ const AppController = (() => {
   }
 
   function editTask(project, task, taskTitle, taskDescription, taskPriority) {
-    const taskToModify = list.projects.find(element => element == project).getTasks.find(element => element == task);
+    const taskToModify = list.projects.find(element => element == project).tasks.find(element => element == task);
 
     taskToModify.title = taskTitle;
     taskToModify.description = taskDescription;
     taskToModify.priority = taskPriority;
-
-    console.log(taskToModify)
   }
 
   function toggleDone(project, task) {
-    console.log(JSON.parse(JSON.stringify(project)))
-    const taskToModify = list.projects.find(element => element == project).getTasks.find(element => element == task);
-    taskToModify.done ? taskToModify.done = false : taskToModify.done = true;
-    console.log(JSON.parse(JSON.stringify(project)))
+    const taskToModify = list.projects.find(element => element == project).tasks.find(element => element == task);
+    taskToModify.toggleDoneStatus();
   }
 
   function deleteTask(project, task) {
@@ -50,7 +46,7 @@ const AppController = (() => {
   function changeCurrentProject(project) {
     currentProject = project;
 
-    ScreenController.renderProject(currentProject);
+    // ScreenController.renderProject(currentProject);
   }
 
   const getProjectsList = () => list.projects;
