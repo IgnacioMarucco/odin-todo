@@ -1,42 +1,46 @@
 import { ScreenController } from "./ScreenController";
+import { List } from "./List";
 import { Project } from "./Project";
 import { Task } from "./Task";
 
 const AppController = (() => {
-  const projectList = [new Project('Study'), new Project('Work')];
+  const list = new List();
   let currentProject = null;
 
-  function createProject() {
-    const projectTitle = document.querySelector('#project_title').value;
-    projectList.push(new Project(projectTitle));
-    ScreenController.changeSidePanelContent();
-    console.log(projectList)
-    // return projectList.push(new Project(projectTitle));
+  function createProject(projectTitle) {
+    const newProject = new Project(projectTitle);
+    list.addProject(newProject);
+    changeCurrentProject(newProject);
   }
 
-  function createTask() {
-    const taskTitle = document.querySelector('#task_title').value;
-    const taskDescription = document.querySelector('#task_description').value;
-    const taskPriority = document.querySelector('input[name="priority"]:checked').value;
-    console.log(taskTitle, taskDescription,taskPriority)
+  function editProject(project, projectTitle) {
+    const projectToModify = list.projects.find(element => element == project);
+    projectToModify.title = projectTitle;
+  }
+
+  function deleteProject(project) {
+    list.removeProject(project);
+  }
+
+  function createTask(taskTitle, taskDescription, taskPriority) {
     currentProject.addTask(new Task(taskTitle, taskDescription, taskPriority))
-    ScreenController.changeCurrentViewContent(currentProject);
   }
 
-  function editTask(project, task) {
-    const taskTitle = document.querySelector('#edit_task_title').value;
-    const taskDescription = document.querySelector('#edit_task_description').value;
-    const taskPriority = document.querySelector('input[name="priority"]:checked').value;
-    console.log({taskTitle, taskDescription, taskPriority})
-    console.log(projectList.find(element => element == project).getTasks.find(element => element == task))
+  function editTask(project, task, taskTitle, taskDescription, taskPriority) {
+    const taskToModify = list.projects.find(element => element == project).getTasks.find(element => element == task);
 
-    const taskToModify = projectList.find(element => element == project).getTasks.find(element => element == task);
     taskToModify.title = taskTitle;
     taskToModify.description = taskDescription;
     taskToModify.priority = taskPriority;
 
+    console.log(taskToModify)
+  }
 
-    ScreenController.changeCurrentViewContent(currentProject);
+  function toggleDone(project, task) {
+    console.log(JSON.parse(JSON.stringify(project)))
+    const taskToModify = list.projects.find(element => element == project).getTasks.find(element => element == task);
+    taskToModify.done ? taskToModify.done = false : taskToModify.done = true;
+    console.log(JSON.parse(JSON.stringify(project)))
   }
 
   function deleteTask(project, task) {
@@ -45,22 +49,21 @@ const AppController = (() => {
 
   function changeCurrentProject(project) {
     currentProject = project;
-    // ScreenController.changeCurrentViewContent(currentProject);
+
+    ScreenController.renderProject(currentProject);
   }
 
-  const getProjectsList = () => projectList;
+  const getProjectsList = () => list.projects;
 
   const getCurrentProject = () => currentProject;
 
-  projectList[0].addTask(new Task('Learn React', 'Watch coderhouse Videos', 'medium-priority'))
-  projectList[0].addTask(new Task('Learn Angular', 'Udemy', 'low-priority'))
+  list.projects[0].addTask(new Task('Learn React', 'Watch coderhouse Videos', 'medium-priority'))
+  list.projects[0].addTask(new Task('Learn Angular', 'Udemy', 'low-priority'))
 
-  projectList[1].addTask(new Task('Clean Kitchen', 'Use cif', 'high-priority'))
-  projectList[1].addTask(new Task('Go to donwtown', 'Pick up stuff', 'low-priority'))
+  list.projects[1].addTask(new Task('Lamao', 'ROFL', 'high-priority'))
+  list.projects[1].addTask(new Task('Go to donwtown', 'Pick up stuff', 'low-priority'))
 
-  // projectList[0].deleteTask()
-
-  return { createProject, createTask, editTask, deleteTask, getProjectsList, changeCurrentProject, getCurrentProject}
+  return { createProject, editProject, deleteProject, createTask, editTask, deleteTask, toggleDone, getProjectsList, changeCurrentProject, getCurrentProject}
 })();
 
 export { AppController }

@@ -9,6 +9,7 @@ class DOMElement {
 
   annexAttributes(attributes) {
     for (const key of Object.keys(attributes)) {
+      if (attributes[key] === null) {continue;}
       this.attributes[key] = attributes[key];
     }
     return this;
